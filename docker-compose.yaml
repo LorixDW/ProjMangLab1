@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+  test-server:
+    build: ./
+    ports:
+      - 3001:3000
+    environment:
+      - PORT=3000
+    volumes:
+      - server-logs:/app/logs
+    networks:
+      - postgres-net
+
+  db-server:
+    container_name: postgres
+    image: postgres
+    restart: on-failure
+    environment:
+      - POSTGRES_DB=test-db
+      - POSTGRES_USER=test-user
+      - POSTGRES_PASSWORD=1234
+    ports:
+      - "5000:5432"   
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - postgres-net 
+
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=test@mail.ru
+      - PGADMIN_DEFAULT_PASSWORD=1234
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - postgres-net
+
+volumes:
+  server-logs:
+  pg-data:
+  pgadmin-data:
+
+networks:
+  postgres-net:
+    driver: bridge
